@@ -1,17 +1,15 @@
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 public class NotesApp {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String fileName = "notes.txt";
         while (true) {
-            System.out.println("\n--- Simple Notes App ---");
-            System.out.println("1. Write a note");
+            System.out.println("\n--- Notes App ---");
+            System.out.println("1. Add a note");
             System.out.println("2. View notes");
             System.out.println("3. Exit");
+            System.out.println("4. Delete a note");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -21,41 +19,82 @@ public class NotesApp {
                     String note = scanner.nextLine();
                     writeNoteToFile(fileName, note);
                     break;
+
                 case 2:
                     readNotesFromFile(fileName);
                     break;
+
+                case 4:
+                    deleteNoteFromFile(fileName, scanner);
+                    break;
+
                 case 3:
-                    System.out.println("Exiting... Try to add new notes!");
+                    System.out.println("Exiting... Goodbye!");
                     scanner.close();
                     return;
+
                 default:
                     System.out.println("Invalid choice! Please try again.");
             }
         }
     }
     public static void writeNoteToFile(String fileName, String note) {
-        try {
-            FileWriter writer = new FileWriter(fileName, true);
+        try (FileWriter writer = new FileWriter(fileName, true)) {
             writer.write(note + "\n");
-            writer.close();
             System.out.println("Note saved successfully!");
         } catch (IOException e) {
-            System.out.println("An error occurred while writing to the file.");
+            System.out.println("Error writing to file.");
         }
     }
     public static void readNotesFromFile(String fileName) {
-        try {
-            FileReader fr = new FileReader(fileName);
-            BufferedReader br = new BufferedReader(fr);
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line;
+            int count = 1;
             System.out.println("\n--- Your Notes ---");
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
+                System.out.println(count++ + ". " + line);
             }
-            br.close();
-            fr.close();
+            if (count == 1) {
+                System.out.println("No notes found!");
+            }
         } catch (IOException e) {
             System.out.println("No notes found or error reading file.");
+        }
+    }
+    public static void deleteNoteFromFile(String fileName, Scanner scanner) {
+        List<String> notes = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                notes.add(line);
+            }
+        } catch (IOException e) {
+            System.out.println("No notes found to delete.");
+            return;
+        }
+        if (notes.isEmpty()) {
+            System.out.println("No notes to delete.");
+            return;
+        }
+        System.out.println("\n--- Select a note to delete ---");
+        for (int i = 0; i < notes.size(); i++) {
+            System.out.println((i + 1) + ". " + notes.get(i));
+        }
+        System.out.print("Enter the note number to delete: ");
+        int num = scanner.nextInt();
+        scanner.nextLine();
+        if (num < 1 || num > notes.size()) {
+            System.out.println("Invalid note number.");
+            return;
+        }
+        notes.remove(num - 1);
+        System.out.println("Note deleted successfully!");
+        try (FileWriter writer = new FileWriter(fileName)) {
+            for (String n : notes) {
+                writer.write(n + "\n");
+            }
+        } catch (IOException e) {
+            System.out.println("Error updating file.");
         }
     }
 }
