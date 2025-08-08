@@ -1,0 +1,61 @@
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Scanner;
+public class NotesApp {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String fileName = "notes.txt";
+        while (true) {
+            System.out.println("\n--- Simple Notes App ---");
+            System.out.println("1. Write a note");
+            System.out.println("2. View notes");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter your note: ");
+                    String note = scanner.nextLine();
+                    writeNoteToFile(fileName, note);
+                    break;
+                case 2:
+                    readNotesFromFile(fileName);
+                    break;
+                case 3:
+                    System.out.println("Exiting... Try to add new notes!");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice! Please try again.");
+            }
+        }
+    }
+    public static void writeNoteToFile(String fileName, String note) {
+        try {
+            FileWriter writer = new FileWriter(fileName, true);
+            writer.write(note + "\n");
+            writer.close();
+            System.out.println("Note saved successfully!");
+        } catch (IOException e) {
+            System.out.println("An error occurred while writing to the file.");
+        }
+    }
+    public static void readNotesFromFile(String fileName) {
+        try {
+            FileReader fr = new FileReader(fileName);
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            System.out.println("\n--- Your Notes ---");
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+            br.close();
+            fr.close();
+        } catch (IOException e) {
+            System.out.println("No notes found or error reading file.");
+        }
+    }
+}
